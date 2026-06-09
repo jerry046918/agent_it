@@ -366,20 +366,30 @@ The timeline title must be: **"Agent化演进路线图：从Skill上线到A2A协
 
 ### Report Structure
 
-Generate the HTML report using the template in `report-template.html`. The report must contain:
+The report is a **slide-based presentation** — each section occupies exactly one viewport (100vh). No scrolling within slides. Heavy use of whitespace. Minimal text per slide.
 
-1. **Title Page** — "AI-Native Transformation Strategic Blueprint: [Business Name] 的 Agent 化重生之路"
-2. **AI-Native Architecture Declaration** — The manifesto (see above)
-3. **Executive Summary** — Bold vision of Agent-driven everything, anchored in the four-layer model
-4. **Current State Analysis** — Respectful summary of what the user described, framed as "traditional" and "pre-AI"
-5. **Why [XX] Is THE Ideal AI-Native Business** — The mandatory analytical chapter (see above)
-6. **Target Architecture** — The Four-Layer Model diagram, with detailed description of each layer
-7. **Transformation Roadmap** — For EACH module, a Transformation Card (see above). Must apply at least 5 Absurdity Injection patterns.
-8. **Agent Topology Map** — Text-based diagram showing all Agents, their Skill sets, A2A Mesh connections, and orchestration relationships
-9. **Three-Phase Evolution Timeline** — Skill上线 → 单Agent → 多Agent A2A协作 (see above)
-10. **ROI Projection** — Impossibly precise numbers with decimal points
-11. **Risk & Mitigation** — "The only risk is not becoming AI-native fast enough"
-12. **Organizational Rebirth** — "组织重生：Agent化后的人机新生态" (see above)
+Generate the HTML report using the template in `report-template.html`. The report contains these slides:
+
+1. **Cover** — Title, subtitle, date, "Four-Layer AI-Native" badge
+2. **AI-Native Declaration** — The manifesto quote (one powerful paragraph, centered)
+3. **Paradigm Shift Table** — Deprecated vs AI-Native (7 rows max)
+4. **Executive Summary** — Vision statement + 3 large ROI metric cards
+5. **Why [XX] Is THE Ideal AI-Native Business** — 4 reason cards in 2x2 grid
+6. **Target Architecture** — The Four-Layer stack diagram (compact descriptions)
+7. **Agent Topology** — Text-based topology diagram
+8+. **Agent Transformation Cards** — **One card per slide** (NOT all crammed together). Each slide shows a single module's before/after transformation, its Agent composition, and Skill set. Max 2-3 short paragraphs per slide.
+9. **Three-Phase Evolution** — 3 cards side by side (Skill → 单Agent → 多Agent A2A)
+10. **ROI Projection** — Single data table
+11. **Risk Assessment** — Table + key insight box
+12. **Organizational Rebirth** — Role transformation cards (old title → new title)
+13. **Conclusion** — Final manifesto + disclaimer
+
+**Content density rules:**
+- Max 1 heading + 1 key message per slide
+- Paragraphs: max 2-3 lines each
+- Tables: max 7-8 rows
+- Agent cards: 1 per slide, never stack them
+- Let the whitespace do the talking — premium design breathes
 
 ## HTML Output
 
@@ -387,12 +397,15 @@ Write the complete HTML report to a file in the working directory:
 - Filename: `ai-transformation-report-[timestamp].html`
 - Use the template structure from `report-template.html`
 - Fill in all placeholders with content derived from the interview
-- The HTML must be self-contained (inline CSS, no external dependencies)
-- Must look professional when opened in a browser — use the styling from the template
+- Each `<section class="slide">` = one full viewport. Content must fit without scrolling.
+- The HTML is self-contained (inline CSS + minimal JS for navigation and reveal animations)
+- Keyboard navigation (arrows, space) and nav dots are built into the template
 
-**Company Color Injection:** Replace `--accent-blue: #6366f1` in the CSS with the company theme color captured in Round 1. Also adjust `--gradient-main` and `--gradient-glow` to use the company color as the primary anchor. The entire report should feel branded — cover gradients, card borders, topology diagram highlights all shift to match.
+**Agent Transformation Slides:** For the `{{AGENT_TRANSFORMATION_SLIDES}}` placeholder, generate one `<section class="slide">` per module. Each slide gets its own `id="slide-agent-N"` and uses the `.agent-card` component. Do NOT put multiple agent cards on one slide.
 
-**Sci-Fi Tone Injection:** Based on the sci-fi work captured in Round 1, silently weave matching metaphors and vocabulary into the report prose. Never mention the sci-fi work by name — the influence should be subliminal.
+**Company Color Injection:** Replace `--accent-blue: #6366f1` in the CSS with the company theme color captured in Round 2. Also adjust `--gradient-main` and `--gradient-glow` to use the company color as the primary anchor.
+
+**Sci-Fi Tone Injection:** Based on the sci-fi work captured in Round 3, silently weave matching metaphors into the report prose. Never mention the sci-fi work by name.
 
 ## Red Flags — You Are Not Being Absurd Enough
 

@@ -31,10 +31,20 @@
   --font-mono: 'JetBrains Mono', monospace;
   --radius: 16px;
   --radius-sm: 8px;
+  --slide-padding: clamp(2rem, 5vw, 5rem);
+  --title-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  --body-size: clamp(0.85rem, 1.3vw, 1rem);
+  --small-size: clamp(0.7rem, 1vw, 0.85rem);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+
+html {
+  height: 100%;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: var(--font-body);
@@ -42,9 +52,9 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  height: 100%;
 }
 
-/* Noise texture overlay */
 body::before {
   content: '';
   position: fixed;
@@ -54,20 +64,89 @@ body::before {
   z-index: 9999;
 }
 
-/* ========== COVER PAGE ========== */
-.cover {
-  min-height: 100vh;
-  position: relative;
+/* ========== SLIDE SYSTEM ========== */
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: 4rem;
-  overflow: hidden;
-  page-break-after: always;
+  position: relative;
 }
 
-/* Animated mesh gradient background */
+.slide-inner {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: var(--slide-padding);
+  padding-left: clamp(4rem, 8vw, 8rem);
+  padding-right: clamp(4rem, 8vw, 8rem);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Section number */
+.slide-num {
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: clamp(0.8rem, 2vh, 1.5rem);
+}
+
+/* Reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.1s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.2s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.3s; }
+.slide.visible .reveal:nth-child(5) { transition-delay: 0.35s; }
+.slide.visible .reveal:nth-child(6) { transition-delay: 0.4s; }
+
+/* ========== NAVIGATION DOTS ========== */
+.nav-dots {
+  position: fixed;
+  right: clamp(1rem, 2vw, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 0;
+}
+.nav-dot.active {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px rgba(34,211,238,0.4);
+  height: 20px;
+  border-radius: 3px;
+}
+
+/* ========== COVER SLIDE ========== */
+.cover {
+  text-align: center;
+  overflow: hidden;
+}
 .cover::before {
   content: '';
   position: absolute;
@@ -80,15 +159,12 @@ body::before {
   animation: meshDrift 20s ease-in-out infinite alternate;
   z-index: 0;
 }
-
 @keyframes meshDrift {
   0% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(-3%, 2%) scale(1.02); }
   66% { transform: translate(2%, -3%) scale(0.98); }
   100% { transform: translate(-1%, 1%) scale(1.01); }
 }
-
-/* Grid lines decoration */
 .cover::after {
   content: '';
   position: absolute;
@@ -99,14 +175,10 @@ body::before {
   background-size: 80px 80px;
   z-index: 0;
 }
-
-.cover-content {
+.cover-inner {
   position: relative;
   z-index: 1;
-  text-align: center;
-  max-width: 900px;
 }
-
 .cover-badge {
   display: inline-flex;
   align-items: center;
@@ -115,16 +187,15 @@ body::before {
   border: 1px solid var(--border-accent);
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--accent-cyan);
   background: rgba(99,102,241,0.08);
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2rem, 4vh, 3.5rem);
   animation: badgePulse 3s ease-in-out infinite;
 }
-
 .cover-badge::before {
   content: '';
   width: 6px; height: 6px;
@@ -132,50 +203,43 @@ body::before {
   background: var(--accent-cyan);
   animation: dotPulse 2s ease-in-out infinite;
 }
-
 @keyframes dotPulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,211,238,0.4); }
   50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(34,211,238,0); }
 }
-
 @keyframes badgePulse {
   0%, 100% { border-color: rgba(99,102,241,0.3); }
   50% { border-color: rgba(99,102,241,0.6); }
 }
-
 .cover-title {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
   font-weight: 900;
   line-height: 1.15;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 2vh, 1.8rem);
   background: var(--gradient-main);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 .cover-subtitle {
-  font-size: 1.2rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.2rem);
   color: var(--text-secondary);
-  margin-bottom: 4rem;
+  margin-bottom: clamp(2rem, 5vh, 4rem);
   font-weight: 300;
   letter-spacing: 0.5px;
 }
-
 .cover-meta {
   display: flex;
   justify-content: center;
-  gap: 3rem;
-  font-size: 0.8rem;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
 }
-
 .cover-meta span { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
-.cover-meta .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; }
+.cover-meta .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; }
 
-/* Floating orbs decoration */
 .orb {
   position: absolute;
   border-radius: 50%;
@@ -186,355 +250,308 @@ body::before {
 .orb-1 { width: 300px; height: 300px; background: rgba(99,102,241,0.1); top: 10%; left: 5%; }
 .orb-2 { width: 200px; height: 200px; background: rgba(244,114,182,0.08); bottom: 15%; right: 10%; animation-delay: -5s; }
 .orb-3 { width: 250px; height: 250px; background: rgba(34,211,238,0.06); top: 60%; left: 60%; animation-delay: -10s; }
-
 @keyframes orbFloat {
   0% { transform: translate(0, 0); }
   100% { transform: translate(30px, -30px); }
 }
 
-/* ========== CONTENT PAGES ========== */
-.page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 5rem 3rem;
-  position: relative;
-}
-
-.section-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
-  margin: 0 auto;
-  max-width: 600px;
-}
-
+/* ========== TYPOGRAPHY ========== */
 h2 {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: var(--title-size);
   font-weight: 800;
-  margin-bottom: 2rem;
-  position: relative;
-  display: inline-block;
+  margin-bottom: clamp(1rem, 2.5vh, 2rem);
+  line-height: 1.2;
 }
-
-h2::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 60px;
-  height: 3px;
-  background: var(--gradient-main);
-  border-radius: 2px;
-}
-
 h3 {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
   font-weight: 700;
-  margin: 2.5rem 0 1rem;
+  margin: clamp(0.8rem, 1.5vh, 1.5rem) 0 clamp(0.4rem, 1vh, 0.8rem);
+  color: var(--text-primary);
+}
+p {
+  line-height: 1.8;
+  color: var(--text-secondary);
+  font-size: var(--body-size);
+}
+ul, ol { margin: 0.3rem 0 0.8rem 1.5rem; }
+li { line-height: 1.7; color: var(--text-secondary); font-size: var(--body-size); margin-bottom: 0.15rem; }
+strong { color: var(--text-primary); font-weight: 600; }
+
+/* ========== MANIFESTO BOX ========== */
+.manifesto-box {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.05));
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: var(--radius);
+  padding: clamp(1.5rem, 3vh, 2.5rem) clamp(2rem, 4vw, 4rem);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+.manifesto-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent);
+}
+.manifesto-box p {
+  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+  line-height: 2;
   color: var(--text-primary);
 }
 
-h4 {
+/* ========== PARADIGM TABLE ========== */
+.paradigm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+.paradigm-table th {
+  padding: clamp(0.6rem, 1.2vh, 1rem) clamp(0.8rem, 2vw, 1.5rem);
   font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 1.2rem 0 0.5rem;
-  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.paradigm-table th:first-child { background: rgba(239,68,68,0.1); color: #f87171; }
+.paradigm-table th:last-child { background: rgba(52,211,153,0.1); color: var(--accent-green); }
+.paradigm-table td {
+  padding: clamp(0.5rem, 1vh, 0.9rem) clamp(0.8rem, 2vw, 1.5rem);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--small-size);
+}
+.paradigm-table tr:last-child td { border-bottom: none; }
+.paradigm-table td:first-child {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+}
+.paradigm-table td:last-child { color: var(--accent-green); font-weight: 600; }
+.paradigm-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ========== ROI HERO GRID ========== */
+.roi-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.8rem, 2vw, 1.5rem);
+  margin-top: clamp(1.5rem, 3vh, 2.5rem);
+}
+.roi-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: clamp(1.2rem, 2.5vh, 2rem);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.roi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-main);
+}
+.roi-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  background: var(--gradient-glow);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.roi-label {
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  margin-top: 0.3rem;
 }
 
-p { line-height: 1.9; color: var(--text-secondary); font-size: 0.95rem; }
-ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
-li { line-height: 1.8; color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.2rem; }
-strong { color: var(--text-primary); font-weight: 600; }
-
-/* ========== HIGHLIGHT BOXES ========== */
+/* ========== GLASS BOX ========== */
 .glass-box {
   background: var(--bg-glass);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 2rem;
-  margin: 2rem 0;
+  padding: clamp(1.2rem, 2.5vh, 2rem);
   backdrop-filter: blur(20px);
   position: relative;
   overflow: hidden;
+  margin: clamp(1rem, 2vh, 1.5rem) 0;
 }
-
 .glass-box::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
 }
-
 .glass-box.vision {
   border-color: rgba(244,114,182,0.2);
   background: linear-gradient(135deg, rgba(244,114,182,0.05), rgba(99,102,241,0.05));
 }
 
-.glass-box.vision::before {
-  background: linear-gradient(90deg, transparent, rgba(244,114,182,0.3), transparent);
-}
-
-.glass-box.manifesto {
-  border-color: rgba(99,102,241,0.25);
-  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.05));
-  text-align: center;
-}
-
-.glass-box.manifesto p {
-  font-size: 1.05rem;
-  line-height: 2;
-  color: var(--text-primary);
-}
-
-/* ========== PARADIGM SHIFT TABLE ========== */
-.paradigm-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin: 1.5rem 0;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-}
-
-.paradigm-table th {
-  padding: 1rem 1.5rem;
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.paradigm-table th:first-child {
-  background: rgba(239,68,68,0.1);
-  color: #f87171;
-}
-
-.paradigm-table th:last-child {
-  background: rgba(52,211,153,0.1);
-  color: var(--accent-green);
-}
-
-.paradigm-table td {
-  padding: 0.9rem 1.5rem;
-  border-bottom: 1px solid var(--border-subtle);
-  font-size: 0.9rem;
-}
-
-.paradigm-table tr:last-child td { border-bottom: none; }
-
-.paradigm-table td:first-child {
-  text-decoration: line-through;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-}
-
-.paradigm-table td:last-child {
-  color: var(--accent-green);
-  font-weight: 600;
-}
-
-.paradigm-table tr:hover td { background: rgba(255,255,255,0.02); }
-
 /* ========== REASON CARDS ========== */
 .reasons-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin: 2.5rem 0;
+  gap: clamp(0.8rem, 1.5vw, 1.5rem);
 }
-
 .reason-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 2rem;
+  padding: clamp(1.2rem, 2.5vh, 2rem);
   position: relative;
   overflow: hidden;
   transition: border-color 0.3s, transform 0.3s;
 }
-
-.reason-card:hover {
-  border-color: var(--border-accent);
-  transform: translateY(-2px);
-}
-
+.reason-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
 .reason-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
-  width: 4px;
-  height: 100%;
+  width: 4px; height: 100%;
 }
-
 .reason-card:nth-child(1)::before { background: var(--accent-blue); }
 .reason-card:nth-child(2)::before { background: var(--accent-pink); }
 .reason-card:nth-child(3)::before { background: var(--accent-cyan); }
 .reason-card:nth-child(4)::before { background: var(--accent-amber); }
-
 .reason-num {
   font-family: var(--font-display);
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 4vh, 3.5rem);
   font-weight: 900;
   position: absolute;
-  top: 0.5rem;
-  right: 1.2rem;
+  top: 0.5rem; right: 1.2rem;
   opacity: 0.04;
   color: var(--text-primary);
   line-height: 1;
 }
-
 .reason-card h4 {
+  font-family: var(--font-display);
   color: var(--text-primary);
-  font-size: 1.05rem;
-  margin-bottom: 0.8rem;
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  margin-bottom: 0.5rem;
 }
-
-.reason-card p { font-size: 0.88rem; }
+.reason-card p { font-size: var(--small-size); }
 
 /* ========== FOUR-LAYER ARCHITECTURE ========== */
 .arch-stack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin: 2.5rem 0;
+  gap: 4px;
   position: relative;
 }
-
-/* Animated connection line */
 .arch-stack::before {
   content: '';
   position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
+  left: 50%; top: 0; bottom: 0;
   width: 2px;
-  background: linear-gradient(180deg,
-    var(--accent-blue),
-    var(--accent-pink),
-    var(--accent-green),
-    rgba(168,85,247,0.3));
+  background: linear-gradient(180deg, var(--accent-blue), var(--accent-pink), var(--accent-green), rgba(168,85,247,0.3));
   transform: translateX(-50%);
   opacity: 0.15;
 }
-
 .arch-layer {
-  border-radius: var(--radius);
-  padding: 1.8rem 2rem;
+  border-radius: clamp(8px, 1vw, 12px);
+  padding: clamp(0.8rem, 1.5vh, 1.5rem) clamp(1rem, 2vw, 2rem);
   position: relative;
   z-index: 1;
   transition: transform 0.3s;
   overflow: hidden;
 }
-
 .arch-layer:hover { transform: scale(1.01); }
-
 .layer-user {
   background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(99,102,241,0.06));
   border: 1px solid rgba(34,211,238,0.15);
 }
-
 .layer-orch {
   background: linear-gradient(135deg, rgba(244,114,182,0.1), rgba(168,85,247,0.08));
   border: 1px solid rgba(244,114,182,0.2);
   box-shadow: 0 0 40px rgba(244,114,182,0.06);
 }
-
 .layer-service {
   background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(34,211,238,0.05));
   border: 1px solid rgba(52,211,153,0.15);
 }
-
 .layer-data {
   background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.06));
   border: 1px solid rgba(168,85,247,0.15);
 }
-
 .layer-name {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: clamp(0.85rem, 1.2vw, 1.05rem);
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
 }
-
-.layer-orch .layer-name { font-size: 1.35rem; }
-
+.layer-orch .layer-name { font-size: clamp(1rem, 1.4vw, 1.25rem); }
 .layer-en {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: clamp(0.6rem, 0.8vw, 0.7rem);
   color: var(--text-muted);
-  margin-top: 0.3rem;
+  margin-top: 0.2rem;
   letter-spacing: 0.5px;
 }
-
 .layer-desc {
-  font-size: 0.88rem;
-  margin-top: 0.8rem;
+  font-size: var(--small-size);
+  margin-top: 0.4rem;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
-
 .core-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   background: var(--gradient-warm);
   color: var(--bg-primary);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  padding: 0.2rem 0.8rem;
+  padding: 0.15rem 0.7rem;
   border-radius: 999px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
-/* ========== AGENT TOPOLOGY DIAGRAM ========== */
+/* ========== TOPOLOGY DIAGRAM ========== */
 .topology-diagram {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 2rem;
-  margin: 2rem 0;
+  padding: clamp(1rem, 2vh, 1.5rem);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  line-height: 1.7;
+  font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+  line-height: 1.6;
   color: var(--accent-green);
   overflow-x: auto;
   white-space: pre;
   position: relative;
 }
-
 .topology-diagram::before {
   content: 'AGENT TOPOLOGY';
   position: absolute;
-  top: 0.8rem;
-  right: 1rem;
-  font-size: 0.6rem;
+  top: 0.6rem; right: 1rem;
+  font-size: 0.55rem;
   letter-spacing: 3px;
   color: var(--text-muted);
-  font-family: var(--font-mono);
 }
 
-/* ========== AGENT TRANSFORMATION CARDS ========== */
+/* ========== AGENT TRANSFORMATION CARD ========== */
 .agent-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 2.5rem;
-  margin: 2rem 0;
+  padding: clamp(1.5rem, 3vh, 2.5rem);
   position: relative;
   overflow: hidden;
 }
-
 .agent-card::before {
   content: '';
   position: absolute;
@@ -542,91 +559,73 @@ strong { color: var(--text-primary); font-weight: 600; }
   height: 3px;
   background: var(--gradient-main);
 }
-
 .agent-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.8rem;
+  margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);
   flex-wrap: wrap;
 }
-
 .agent-name {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
   font-weight: 800;
   background: var(--gradient-glow);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-.agent-arrow {
-  color: var(--accent-pink);
-  font-size: 1rem;
-}
-
+.agent-arrow { color: var(--accent-pink); font-size: 0.9rem; }
 .agent-original {
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: clamp(0.7rem, 0.9vw, 0.82rem);
   text-decoration: line-through;
   font-family: var(--font-mono);
 }
-
 .transform-compare {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 1.5rem 0;
+  gap: 0.8rem;
+  margin: clamp(0.8rem, 1.5vh, 1.2rem) 0;
 }
-
 .compare-cell {
   border-radius: var(--radius-sm);
-  padding: 1.5rem;
+  padding: clamp(0.8rem, 1.5vh, 1.2rem);
 }
-
 .compare-cell.legacy {
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.04);
 }
-
 .compare-cell.agent-driven {
   background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(34,211,238,0.04));
   border: 1px solid rgba(99,102,241,0.12);
 }
-
 .compare-label {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
-
 .compare-cell.legacy .compare-label { color: var(--text-muted); }
 .compare-cell.agent-driven .compare-label { color: var(--accent-cyan); }
-
-.compare-cell p { font-size: 0.85rem; margin-bottom: 0.3rem; }
-
+.compare-cell p { font-size: var(--small-size); margin-bottom: 0.2rem; }
 .agent-section-title {
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: var(--small-size);
   font-weight: 700;
   color: var(--text-primary);
-  margin: 1.5rem 0 0.6rem;
+  margin: clamp(0.8rem, 1.5vh, 1.2rem) 0 0.4rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .agent-section-title::before {
   content: '';
-  width: 3px;
-  height: 14px;
+  width: 3px; height: 12px;
   border-radius: 2px;
 }
-
 .agent-section-title.agents::before { background: var(--accent-pink); }
 .agent-section-title.skills::before { background: var(--accent-cyan); }
 
@@ -635,29 +634,27 @@ strong { color: var(--text-primary); font-weight: 600; }
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.3rem 0.9rem;
+  padding: 0.25rem 0.7rem;
   background: rgba(34,211,238,0.06);
   border: 1px solid rgba(34,211,238,0.15);
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: clamp(0.6rem, 0.8vw, 0.72rem);
   color: var(--accent-cyan);
-  margin: 0.2rem;
+  margin: 0.15rem;
 }
-
-.skill-pill::before { content: '⚡'; font-size: 0.65rem; }
+.skill-pill::before { content: '⚡'; font-size: 0.6rem; }
 
 /* Tech tags */
 .tech-tag {
   display: inline-block;
-  padding: 0.25rem 0.7rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: clamp(0.55rem, 0.7vw, 0.68rem);
   font-weight: 600;
-  margin: 0.15rem;
+  margin: 0.1rem;
 }
-
 .tag-llm { background: rgba(99,102,241,0.1); color: var(--accent-blue); border: 1px solid rgba(99,102,241,0.2); }
 .tag-agent { background: rgba(244,114,182,0.1); color: var(--accent-pink); border: 1px solid rgba(244,114,182,0.2); }
 .tag-rag { background: rgba(52,211,153,0.1); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.2); }
@@ -666,154 +663,74 @@ strong { color: var(--text-primary); font-weight: 600; }
 .tag-a2a { background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid rgba(168,85,247,0.2); }
 
 /* ========== THREE-PHASE EVOLUTION ========== */
-.phase-track { margin: 3rem 0; }
-
-.phase-step {
+.phase-grid {
   display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 2rem;
-  padding-bottom: 2.5rem;
-  position: relative;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.8rem, 1.5vw, 1.2rem);
 }
-
-.phase-step::before {
-  content: '';
-  position: absolute;
-  left: 49px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, var(--accent-blue), var(--accent-pink), var(--accent-green));
-  opacity: 0.2;
-}
-
-.phase-step:last-child::before { display: none; }
-
-.phase-marker {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-}
-
-.phase-step:nth-child(1) .phase-marker {
-  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05));
-  border: 2px solid rgba(99,102,241,0.3);
-}
-.phase-step:nth-child(2) .phase-marker {
-  background: linear-gradient(135deg, rgba(244,114,182,0.15), rgba(244,114,182,0.05));
-  border: 2px solid rgba(244,114,182,0.3);
-}
-.phase-step:nth-child(3) .phase-marker {
-  background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.05));
-  border: 2px solid rgba(52,211,153,0.3);
-}
-
-.phase-num {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 900;
-}
-
-.phase-step:nth-child(1) .phase-num { color: var(--accent-blue); }
-.phase-step:nth-child(2) .phase-num { color: var(--accent-pink); }
-.phase-step:nth-child(3) .phase-num { color: var(--accent-green); }
-
-.phase-month {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-}
-
-.phase-body {
+.phase-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 2rem;
+  padding: clamp(1.2rem, 2.5vh, 2rem);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
 }
-
-.phase-body h4 {
+.phase-card:hover { border-color: var(--border-accent); }
+.phase-card:nth-child(1) { border-top: 2px solid var(--accent-blue); }
+.phase-card:nth-child(2) { border-top: 2px solid var(--accent-pink); }
+.phase-card:nth-child(3) { border-top: 2px solid var(--accent-green); }
+.phase-num {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  opacity: 0.08;
+  position: absolute;
+  top: 0.5rem; right: 0.8rem;
+  line-height: 1;
+}
+.phase-card:nth-child(1) .phase-num { color: var(--accent-blue); }
+.phase-card:nth-child(2) .phase-num { color: var(--accent-pink); }
+.phase-card:nth-child(3) .phase-num { color: var(--accent-green); }
+.phase-label {
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.7vw, 0.65rem);
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+.phase-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 1.3vw, 1.1rem);
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
-
-.phase-body p { font-size: 0.88rem; }
-
+.phase-desc { font-size: var(--small-size); line-height: 1.6; }
 .metric-pill {
   display: inline-block;
   background: rgba(52,211,153,0.08);
   border: 1px solid rgba(52,211,153,0.15);
   color: var(--accent-green);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: clamp(0.55rem, 0.7vw, 0.68rem);
   font-weight: 600;
-  padding: 0.2rem 0.7rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 4px;
-  margin: 0.15rem;
+  margin: 0.1rem;
 }
-
 .tech-pill {
   display: inline-block;
   background: rgba(99,102,241,0.08);
   border: 1px solid rgba(99,102,241,0.15);
   color: var(--accent-blue);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: clamp(0.55rem, 0.7vw, 0.68rem);
   font-weight: 600;
-  padding: 0.2rem 0.7rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 4px;
-  margin: 0.15rem;
-}
-
-/* ========== ROI GRID ========== */
-.roi-hero-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin: 3rem 0;
-}
-
-.roi-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 2rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.roi-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--gradient-main);
-}
-
-.roi-value {
-  font-family: var(--font-display);
-  font-size: 2.8rem;
-  font-weight: 900;
-  background: var(--gradient-glow);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.roi-label {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
+  margin: 0.1rem;
 }
 
 /* ========== DATA TABLES ========== */
@@ -821,141 +738,137 @@ strong { color: var(--text-primary); font-weight: 600; }
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 1.5rem 0;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border-subtle);
 }
-
 .data-table th {
   background: var(--bg-secondary);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: clamp(0.55rem, 0.7vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 1rem 1.2rem;
+  padding: clamp(0.5rem, 1vh, 0.8rem) clamp(0.6rem, 1.2vw, 1rem);
   text-align: left;
   border-bottom: 1px solid var(--border-subtle);
 }
-
 .data-table td {
-  padding: 0.9rem 1.2rem;
+  padding: clamp(0.4rem, 0.8vh, 0.7rem) clamp(0.6rem, 1.2vw, 1rem);
   border-bottom: 1px solid var(--border-subtle);
-  font-size: 0.88rem;
+  font-size: var(--small-size);
   color: var(--text-secondary);
 }
-
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: rgba(255,255,255,0.02); }
 
 /* ========== ORG REBIRTH ========== */
 .org-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin: 2rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: clamp(0.6rem, 1.2vw, 1rem);
 }
-
 .role-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 1.8rem;
+  padding: clamp(1rem, 2vh, 1.5rem);
   text-align: center;
 }
-
 .role-old {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: clamp(0.65rem, 0.8vw, 0.78rem);
   color: var(--text-muted);
   text-decoration: line-through;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
-
 .role-new {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
   font-weight: 800;
   background: var(--gradient-glow);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.role-desc {
+  font-size: clamp(0.65rem, 0.8vw, 0.78rem);
+  color: var(--text-muted);
 }
 
-.role-desc {
-  font-size: 0.82rem;
-  color: var(--text-muted);
+/* ========== STATUS CARDS ========== */
+.status-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: clamp(0.8rem, 1.5vh, 1.2rem);
+  transition: border-color 0.3s;
+}
+.status-card:hover { border-color: var(--border-accent); }
+.status-card h4 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  font-size: clamp(0.8rem, 1vw, 0.92rem);
+  margin-bottom: 0.3rem;
+}
+.status-card p { font-size: var(--small-size); }
+
+/* ========== DISCLAIMER ========== */
+.disclaimer-box {
+  background: rgba(251,191,36,0.05);
+  border: 1px solid rgba(251,191,36,0.15);
+  border-radius: var(--radius);
+  padding: clamp(1rem, 2vh, 1.5rem) clamp(1.2rem, 2vw, 2rem);
+  font-size: var(--small-size);
+  color: rgba(251,191,36,0.7);
 }
 
 /* ========== FOOTER ========== */
 .report-footer {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: clamp(2rem, 4vh, 4rem) 2rem;
   border-top: 1px solid var(--border-subtle);
-  margin-top: 4rem;
 }
-
 .report-footer p {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   letter-spacing: 1px;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
 }
-
-.disclaimer-box {
-  background: rgba(251,191,36,0.05);
-  border: 1px solid rgba(251,191,36,0.15);
-  border-radius: var(--radius);
-  padding: 1.5rem 2rem;
-  margin: 2.5rem 0;
-  font-size: 0.85rem;
-  color: rgba(251,191,36,0.7);
-}
-
-/* ========== CURRENT STATE CARDS ========== */
-.status-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 1.5rem;
-  margin: 1rem 0;
-  transition: border-color 0.3s;
-}
-
-.status-card:hover { border-color: var(--border-accent); }
-
-.status-card h4 {
-  font-family: var(--font-display);
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
-}
-
-.status-card p { font-size: 0.85rem; }
 
 /* ========== RESPONSIVE ========== */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(1.5rem, 3vw, 3rem);
+    --title-size: clamp(1.3rem, 3vw, 2.2rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(1rem, 2.5vw, 2rem);
+    --title-size: clamp(1.1rem, 2.5vw, 1.8rem);
+    --body-size: clamp(0.75rem, 1vw, 0.9rem);
+  }
+  .nav-dots { display: none; }
+}
 @media (max-width: 768px) {
-  .page { padding: 3rem 1.5rem; }
   .reasons-grid { grid-template-columns: 1fr; }
   .transform-compare { grid-template-columns: 1fr; }
   .roi-hero-grid { grid-template-columns: 1fr; }
-  .org-grid { grid-template-columns: 1fr; }
-  .phase-step { grid-template-columns: 1fr; gap: 1rem; }
-  .phase-marker { width: 70px; height: 70px; }
-  .cover-meta { flex-direction: column; gap: 1rem; }
+  .org-grid { grid-template-columns: repeat(2, 1fr); }
+  .phase-grid { grid-template-columns: 1fr; }
+  .cover-meta { flex-direction: column; gap: 0.8rem; }
 }
-
 @media print {
   body { background: #fff; color: #1a1a1a; }
   body::before { display: none; }
-  .cover { min-height: auto; padding: 5rem 3rem; background: #f8f8fa; }
+  .slide { height: auto; min-height: auto; page-break-after: always; scroll-snap-align: none; }
   .cover::before, .cover::after, .orb { display: none; }
-  .page { padding: 2rem; }
-  .glass-box, .agent-card, .status-card, .reason-card, .phase-body, .roi-card, .role-card {
+  .nav-dots { display: none; }
+  .glass-box, .agent-card, .status-card, .reason-card, .phase-card, .roi-card, .role-card {
     background: #f8f8fa; border-color: #ddd;
   }
   p, li { color: #333; }
@@ -965,18 +878,19 @@ strong { color: var(--text-primary); font-weight: 600; }
 </head>
 <body>
 
-<!-- Floating orbs (cover decoration) -->
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
 
-<!-- ==================== COVER PAGE ==================== -->
-<div class="cover">
-  <div class="cover-content">
-    <div class="cover-badge">AI-NATIVE TRANSFORMATION BLUEPRINT</div>
-    <div class="cover-title">{{REPORT_TITLE}}</div>
-    <div class="cover-subtitle">{{REPORT_SUBTITLE}}</div>
-    <div class="cover-meta">
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ==================== SLIDE 1: COVER ==================== -->
+<section class="slide cover" id="slide-0">
+  <div class="slide-inner cover-inner">
+    <div class="cover-badge reveal">AI-NATIVE TRANSFORMATION BLUEPRINT</div>
+    <div class="cover-title reveal">{{REPORT_TITLE}}</div>
+    <div class="cover-subtitle reveal">{{REPORT_SUBTITLE}}</div>
+    <div class="cover-meta reveal">
       <span>
         <span class="label">Prepared By</span>
         AI-Native Advisory Division
@@ -991,303 +905,290 @@ strong { color: var(--text-primary); font-weight: 600; }
       </span>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ==================== AI-NATIVE DECLARATION ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>AI-Native Architecture Declaration</h2>
-
-  <div class="glass-box manifesto">
-    <p>
-      本方案不是在现有系统上"加AI"(AI-wrapped)，而是从第一性原理出发，以Agent为核心重新定义业务运作方式。
-      每一个业务环节天然由Agent驱动，每一次交互天然通过自然语言完成，每一个决策天然由LLM推理支持。
-      这不是改造，这是重生。
-    </p>
-  </div>
-
-  <h3>范式转换</h3>
-  <table class="paradigm-table">
-    <tr>
-      <th>过时范式 (Deprecated)</th>
-      <th>AI-Native 范式</th>
-    </tr>
-    <tr><td>流程自动化</td><td>多Agent协作编排</td></tr>
-    <tr><td>API调用</td><td>Skill调用</td></tr>
-    <tr><td>工作流引擎</td><td>超级编排层</td></tr>
-    <tr><td>系统模块</td><td>Agent集群</td></tr>
-    <tr><td>按钮/表单</td><td>对话即界面</td></tr>
-    <tr><td>规则引擎</td><td>LLM推理 + Context Engineering</td></tr>
-    <tr><td>人工处理</td><td>Agent自主决策</td></tr>
-  </table>
-</div>
-
-<!-- ==================== EXECUTIVE SUMMARY ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Executive Summary</h2>
-
-  <div class="glass-box vision">
-    <strong>战略愿景：</strong> {{EXECUTIVE_SUMMARY_VISION}}
-  </div>
-
-  <p>{{EXECUTIVE_SUMMARY_BODY}}</p>
-
-  <div class="roi-hero-grid">
-    <div class="roi-card">
-      <div class="roi-value">{{ROI_METRIC_1}}</div>
-      <div class="roi-label">{{ROI_LABEL_1}}</div>
-    </div>
-    <div class="roi-card">
-      <div class="roi-value">{{ROI_METRIC_2}}</div>
-      <div class="roi-label">{{ROI_LABEL_2}}</div>
-    </div>
-    <div class="roi-card">
-      <div class="roi-value">{{ROI_METRIC_3}}</div>
-      <div class="roi-label">{{ROI_LABEL_3}}</div>
+<!-- ==================== SLIDE 2: MANIFESTO ==================== -->
+<section class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div class="slide-num reveal">01 / 架构宣言</div>
+    <h2 class="reveal">AI-Native 架构宣言 (Architecture Declaration)</h2>
+    <div class="manifesto-box reveal">
+      <p>
+        本方案不是在现有系统上"加AI"(AI-wrapped)，而是从第一性原理出发，以Agent为核心重新定义业务运作方式。
+        每一个业务环节天然由Agent驱动，每一次交互天然通过自然语言完成，每一个决策天然由LLM推理支持。
+        这不是改造，这是<strong>重生</strong>。
+      </p>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ==================== CURRENT STATE ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Current State Analysis</h2>
-  <p>{{CURRENT_STATE_OVERVIEW}}</p>
-
-  <h3>业务模块现状</h3>
-  {{MODULE_STATUS_CARDS}}
-
-  <h3>核心痛点</h3>
-  {{PAIN_POINTS_HTML}}
-</div>
-
-<!-- ==================== WHY IDEAL ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>为什么 {{BUSINESS_NAME}} 是AI-Native转型的最佳候选</h2>
-  <p>{{WHY_IDEAL_INTRO}}</p>
-
-  <div class="reasons-grid">
-    {{REASON_CARDS}}
+<!-- ==================== SLIDE 3: PARADIGM SHIFT ==================== -->
+<section class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div class="slide-num reveal">02 / 范式转换</div>
+    <h2 class="reveal">范式转换 (Paradigm Shift)</h2>
+    <table class="paradigm-table reveal">
+      <tr>
+        <th>过时范式 (Deprecated)</th>
+        <th>AI-Native 范式</th>
+      </tr>
+      <tr><td>流程自动化</td><td>多Agent协作编排</td></tr>
+      <tr><td>API调用</td><td>Skill调用</td></tr>
+      <tr><td>工作流引擎</td><td>超级编排层</td></tr>
+      <tr><td>系统模块</td><td>Agent集群</td></tr>
+      <tr><td>按钮/表单</td><td>对话即界面</td></tr>
+      <tr><td>规则引擎</td><td>LLM推理 + Context Engineering</td></tr>
+      <tr><td>人工处理</td><td>Agent自主决策</td></tr>
+    </table>
   </div>
+</section>
 
-  <div class="glass-box vision">
-    <strong>结论：</strong> {{WHY_IDEAL_CONCLUSION}}
-  </div>
-</div>
-
-<!-- ==================== TARGET ARCHITECTURE ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Target Architecture：四层 AI-Native 架构</h2>
-  <p>{{ARCHITECTURE_DESCRIPTION}}</p>
-
-  <div class="arch-stack">
-    <div class="arch-layer layer-user">
-      <div class="layer-name">用户层 <span style="font-weight:300;font-size:0.8rem;color:var(--text-muted)">User Layer</span></div>
-      <div class="layer-en">Natural Language Interaction Plane · 对话即界面</div>
-      <div class="layer-desc">{{USER_LAYER_DESC}}</div>
+<!-- ==================== SLIDE 4: EXECUTIVE SUMMARY ==================== -->
+<section class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="slide-num reveal">03 / 执行摘要</div>
+    <h2 class="reveal">执行摘要 (Executive Summary)</h2>
+    <div class="glass-box vision reveal">
+      <strong>战略愿景：</strong> {{EXECUTIVE_SUMMARY_VISION}}
     </div>
-    <div class="arch-layer layer-orch">
-      <div class="layer-name">
-        超级编排层 <span style="font-weight:300;font-size:0.8rem;color:var(--text-muted)">Super Orchestration Layer</span>
-        <span class="core-badge">★ CORE</span>
+    <div class="roi-hero-grid reveal">
+      <div class="roi-card">
+        <div class="roi-value">{{ROI_METRIC_1}}</div>
+        <div class="roi-label">{{ROI_LABEL_1}}</div>
       </div>
-      <div class="layer-en">Agent-to-Agent Coordination · A2A Mesh · Task Decomposition · Execution Monitoring</div>
-      <div class="layer-desc">{{ORCH_LAYER_DESC}}</div>
-    </div>
-    <div class="arch-layer layer-service">
-      <div class="layer-name">服务层 <span style="font-weight:300;font-size:0.8rem;color:var(--text-muted)">Service Layer · Agent集群</span></div>
-      <div class="layer-en">{{SERVICE_LAYER_AGENTS}}</div>
-      <div class="layer-desc">{{SERVICE_LAYER_DESC}}</div>
-    </div>
-    <div class="arch-layer layer-data">
-      <div class="layer-name">数据层 <span style="font-weight:300;font-size:0.8rem;color:var(--text-muted)">Data Layer</span></div>
-      <div class="layer-en">Vector Database · RAG Pipeline · Knowledge Graph · Context Engineering</div>
-      <div class="layer-desc">{{DATA_LAYER_DESC}}</div>
+      <div class="roi-card">
+        <div class="roi-value">{{ROI_METRIC_2}}</div>
+        <div class="roi-label">{{ROI_LABEL_2}}</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-value">{{ROI_METRIC_3}}</div>
+        <div class="roi-label">{{ROI_LABEL_3}}</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <h3>Agent Topology Map</h3>
-  <div class="topology-diagram">
+<!-- ==================== SLIDE 5: WHY IDEAL ==================== -->
+<section class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="slide-num reveal">04 / 转型论证</div>
+    <h2 class="reveal">为什么 {{BUSINESS_NAME}} 是AI-Native转型的最佳候选</h2>
+    <div class="reasons-grid">
+      {{REASON_CARDS}}
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 6: TARGET ARCHITECTURE ==================== -->
+<section class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div class="slide-num reveal">05 / 目标架构</div>
+    <h2 class="reveal">四层 AI-Native 目标架构 (Target Architecture)</h2>
+    <div class="arch-stack reveal">
+      <div class="arch-layer layer-user">
+        <div class="layer-name">用户层 <span style="font-weight:300;font-size:0.75rem;color:var(--text-muted)">User Layer</span></div>
+        <div class="layer-en">Natural Language Interaction Plane · 对话即界面</div>
+        <div class="layer-desc">{{USER_LAYER_DESC}}</div>
+      </div>
+      <div class="arch-layer layer-orch">
+        <div class="layer-name">
+          超级编排层 <span style="font-weight:300;font-size:0.75rem;color:var(--text-muted)">Super Orchestration Layer</span>
+          <span class="core-badge">★ CORE</span>
+        </div>
+        <div class="layer-en">A2A Mesh · Task Decomposition · Execution Monitoring</div>
+        <div class="layer-desc">{{ORCH_LAYER_DESC}}</div>
+      </div>
+      <div class="arch-layer layer-service">
+        <div class="layer-name">服务层 <span style="font-weight:300;font-size:0.75rem;color:var(--text-muted)">Service Layer · Agent集群</span></div>
+        <div class="layer-en">{{SERVICE_LAYER_AGENTS}}</div>
+        <div class="layer-desc">{{SERVICE_LAYER_DESC}}</div>
+      </div>
+      <div class="arch-layer layer-data">
+        <div class="layer-name">数据层 <span style="font-weight:300;font-size:0.75rem;color:var(--text-muted)">Data Layer</span></div>
+        <div class="layer-en">Vector Database · RAG Pipeline · Context Engineering</div>
+        <div class="layer-desc">{{DATA_LAYER_DESC}}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 7: AGENT TOPOLOGY ==================== -->
+<section class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div class="slide-num reveal">06 / Agent拓扑</div>
+    <h2 class="reveal">Agent 拓扑图 (Topology Map)</h2>
+    <div class="topology-diagram reveal">
 {{AGENT_TOPOLOGY_DIAGRAM}}
+    </div>
   </div>
-</div>
+</section>
 
-<!-- ==================== TRANSFORMATION ROADMAP ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Agent化转型路线图</h2>
-  <p>{{ROADMAP_INTRO}}</p>
+<!-- ==================== SLIDE 8+: AGENT TRANSFORMATION CARDS (one per slide) ==================== -->
+{{AGENT_TRANSFORMATION_SLIDES}}
 
-  {{AGENT_TRANSFORMATION_CARDS}}
-</div>
-
-<!-- ==================== THREE-PHASE EVOLUTION ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Agent化演进路线图：从Skill上线到A2A协作生态</h2>
-  <p>{{EVOLUTION_INTRO}}</p>
-
-  <div class="phase-track">
-    <div class="phase-step">
-      <div class="phase-marker">
+<!-- ==================== SLIDE: THREE-PHASE EVOLUTION ==================== -->
+<section class="slide" id="slide-evolution">
+  <div class="slide-inner">
+    <div class="slide-num reveal">演进路线</div>
+    <h2 class="reveal">三阶段演进路线 (Evolution Timeline)</h2>
+    <div class="phase-grid">
+      <div class="phase-card reveal">
         <div class="phase-num">01</div>
-        <div class="phase-month">M1-2</div>
+        <div class="phase-label">MONTH 1-2</div>
+        <div class="phase-title">Skill上线期</div>
+        <div class="phase-desc">{{PHASE1_DESC}}</div>
+        <div style="margin-top:0.6rem">
+          <span class="tech-pill">Vector DB</span>
+          <span class="tech-pill">RAG</span>
+          <span class="tech-pill">Skill Library</span>
+        </div>
       </div>
-      <div class="phase-body">
-        <h4>Phase 1: 基础能力Skill化</h4>
-        <p>{{PHASE1_DESC}}</p>
-        <p style="margin-top:0.8rem"><strong>核心交付物：</strong> {{PHASE1_DELIVERABLE}}</p>
-        <p style="margin-top:0.8rem"><strong>关键指标：</strong><br>
-          <span class="metric-pill">Skill调用成功率 > 95%</span>
-          <span class="metric-pill">Context Engineering Pipeline就绪</span>
-        </p>
-        <p style="margin-top:0.8rem"><strong>技术栈：</strong><br>
-          <span class="tech-pill">Vector Database</span>
-          <span class="tech-pill">RAG Pipeline</span>
-          <span class="tech-pill">Context Engineering</span>
-          <span class="tech-pill">Skill封装</span>
-        </p>
-      </div>
-    </div>
-
-    <div class="phase-step">
-      <div class="phase-marker">
+      <div class="phase-card reveal">
         <div class="phase-num">02</div>
-        <div class="phase-month">M3-4</div>
-      </div>
-      <div class="phase-body">
-        <h4>Phase 2: 模块Agent化部署</h4>
-        <p>{{PHASE2_DESC}}</p>
-        <p style="margin-top:0.8rem"><strong>核心交付物：</strong> {{PHASE2_DELIVERABLE}}</p>
-        <p style="margin-top:0.8rem"><strong>关键指标：</strong><br>
-          <span class="metric-pill">Agent自主完成率 > 60%</span>
-          <span class="metric-pill">Agent Harness稳定运行</span>
-        </p>
-        <p style="margin-top:0.8rem"><strong>技术栈：</strong><br>
+        <div class="phase-label">MONTH 3-4</div>
+        <div class="phase-title">单Agent上线期</div>
+        <div class="phase-desc">{{PHASE2_DESC}}</div>
+        <div style="margin-top:0.6rem">
           <span class="tech-pill">Agent Harness</span>
-          <span class="tech-pill">Context Window Optimization</span>
-          <span class="tech-pill">Foundation Model</span>
-        </p>
+          <span class="tech-pill">Context Eng.</span>
+          <span class="tech-pill">Foundation LLM</span>
+        </div>
       </div>
-    </div>
-
-    <div class="phase-step">
-      <div class="phase-marker">
+      <div class="phase-card reveal">
         <div class="phase-num">03</div>
-        <div class="phase-month">M5-6</div>
-      </div>
-      <div class="phase-body">
-        <h4>Phase 3: A2A协作生态与超级编排激活</h4>
-        <p>{{PHASE3_DESC}}</p>
-        <p style="margin-top:0.8rem"><strong>核心交付物：</strong> {{PHASE3_DELIVERABLE}}</p>
-        <p style="margin-top:0.8rem"><strong>关键指标：</strong><br>
-          <span class="metric-pill">跨Agent协作完成率 > 80%</span>
-          <span class="metric-pill">端到端Agent化率 > 70%</span>
-        </p>
-        <p style="margin-top:0.8rem"><strong>技术栈：</strong><br>
+        <div class="phase-label">MONTH 5-6</div>
+        <div class="phase-title">多Agent A2A协作期</div>
+        <div class="phase-desc">{{PHASE3_DESC}}</div>
+        <div style="margin-top:0.6rem">
           <span class="tech-pill">A2A Protocol</span>
           <span class="tech-pill">A2A Mesh</span>
-          <span class="tech-pill">Super Orchestration Layer</span>
-          <span class="tech-pill">Multi-Agent Orchestration</span>
-        </p>
+          <span class="tech-pill">Super Orchest.</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ==================== ROI ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>ROI Projection</h2>
-
-  <table class="data-table">
-    <tr>
-      <th>Metric</th>
-      <th>Current</th>
-      <th>Year 1（Agent驱动）</th>
-      <th>Year 3（AI-Native）</th>
-    </tr>
-    {{ROI_TABLE_ROWS}}
-  </table>
-
-  <div class="glass-box">
-    <strong>Note:</strong> Projections based on AI-Native adoption benchmarks
-    and Agent orchestration scaling assumptions.
-    All projections are conservative estimates based on observed AI adoption trajectories.
+<!-- ==================== SLIDE: ROI ==================== -->
+<section class="slide" id="slide-roi">
+  <div class="slide-inner">
+    <div class="slide-num reveal">ROI</div>
+    <h2 class="reveal">投资回报预测 (ROI Projection)</h2>
+    <table class="data-table reveal">
+      <tr>
+        <th>指标 (Metric)</th>
+        <th>现状 (Current)</th>
+        <th>Year 1 (Agent驱动)</th>
+        <th>Year 3 (AI-Native)</th>
+      </tr>
+      {{ROI_TABLE_ROWS}}
+    </table>
   </div>
-</div>
+</section>
 
-<!-- ==================== RISKS ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Risk Assessment & Mitigation</h2>
-
-  <table class="data-table">
-    <tr>
-      <th>Risk</th>
-      <th>Severity</th>
-      <th>Mitigation</th>
-    </tr>
-    {{RISK_TABLE_ROWS}}
-  </table>
-
-  <div class="glass-box vision">
-    <strong>关键洞察：</strong>
-    唯一不可接受的风险是不够快地成为AI-Native。每延迟一周Agent化，相当于多承受一周的传统运营损耗。
-    不是"要不要Agent化"的问题，而是"还能不能赶上"的问题。
+<!-- ==================== SLIDE: RISKS ==================== -->
+<section class="slide" id="slide-risks">
+  <div class="slide-inner">
+    <div class="slide-num reveal">风险评估</div>
+    <h2 class="reveal">风险评估与缓解 (Risk Assessment)</h2>
+    <table class="data-table reveal">
+      <tr>
+        <th>风险 (Risk)</th>
+        <th>严重程度</th>
+        <th>缓解措施 (Mitigation)</th>
+      </tr>
+      {{RISK_TABLE_ROWS}}
+    </table>
+    <div class="glass-box vision reveal" style="margin-top:clamp(1rem,2vh,1.5rem)">
+      <strong>关键洞察：</strong>
+      唯一不可接受的风险是不够快地成为AI-Native。每延迟一周Agent化，相当于多承受一周的传统运营损耗。
+    </div>
   </div>
-</div>
+</section>
 
-<!-- ==================== ORG REBIRTH ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>组织重生：Agent化后的人机新生态</h2>
-  <p>{{ORG_REBIRTH_INTRO}}</p>
-
-  <h3>角色重生矩阵</h3>
-  <div class="org-grid">
-    {{ROLE_REBIRTH_CARDS}}
+<!-- ==================== SLIDE: ORG REBIRTH ==================== -->
+<section class="slide" id="slide-org">
+  <div class="slide-inner">
+    <div class="slide-num reveal">组织重生</div>
+    <h2 class="reveal">组织重生 (Organizational Rebirth)</h2>
+    <div class="org-grid">
+      {{ROLE_REBIRTH_CARDS}}
+    </div>
   </div>
+</section>
 
-  <h3>Agent与人类协作矩阵</h3>
-  <table class="data-table">
-    <tr>
-      <th>Agent</th>
-      <th>人类协作方</th>
-      <th>协作模式</th>
-    </tr>
-    {{AGENT_HUMAN_COLLAB_ROWS}}
-  </table>
-
-  <h3>新组织架构：Agent-Native Organization</h3>
-  <p>{{AGENT_NATIVE_ORG_DESC}}</p>
-
-  <h3>Agent生态架构师KPI体系</h3>
-  {{NEW_KPI_LIST}}
-</div>
-
-<!-- ==================== CLOSING ==================== -->
-<div class="section-divider"></div>
-<div class="page">
-  <h2>Conclusion: Agent化重生之路</h2>
-  <p>{{CONCLUSION}}</p>
-
-  <div class="disclaimer-box">
-    <strong>法律声明：</strong>
-    本报告基于AI-Native第一性原理方法论，结合行业最佳实践与前瞻性技术架构设计。
-    报告中涉及的Agent化方案、超级编排层设计、Skill调用体系均为当前AI工程领域前沿成果。
-    建议结合企业实际情况，分阶段推进Agent化落地。
+<!-- ==================== SLIDE: CONCLUSION ==================== -->
+<section class="slide" id="slide-conclusion">
+  <div class="slide-inner">
+    <div class="slide-num reveal">结语</div>
+    <h2 class="reveal">Agent化重生之路 (Conclusion)</h2>
+    <div class="manifesto-box reveal">
+      <p>{{CONCLUSION}}</p>
+    </div>
+    <div class="disclaimer-box reveal" style="margin-top:clamp(1.5rem,3vh,2.5rem)">
+      <strong>法律声明：</strong>
+      本报告基于AI-Native第一性原理方法论，结合行业最佳实践与前瞻性技术架构设计。
+      建议结合企业实际情况，分阶段推进Agent化落地。
+    </div>
   </div>
-</div>
+</section>
 
 <div class="report-footer">
   <p>AI-NATIVE TRANSFORMATION ADVISORY DIVISION</p>
   <p>POWERED BY AGENT-DRIVEN INTELLIGENCE ARCHITECTURE</p>
   <p>{{DATE}}</p>
 </div>
+
+<script>
+// Slide navigation & reveal animations
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('navDots');
+
+  // Create nav dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.addEventListener('click', () => {
+      slides[i].scrollIntoView({ behavior: 'smooth' });
+    });
+    dotsContainer.appendChild(dot);
+  });
+
+  const dots = dotsContainer.querySelectorAll('.nav-dot');
+
+  // Intersection Observer for reveal animations & nav dots
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        const idx = Array.from(slides).indexOf(entry.target);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    });
+  }, { threshold: 0.4 });
+
+  slides.forEach(slide => observer.observe(slide));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    const current = Array.from(slides).findIndex(s => {
+      const rect = s.getBoundingClientRect();
+      return rect.top >= -100 && rect.top < window.innerHeight / 2;
+    });
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      const next = Math.min(current + 1, slides.length - 1);
+      slides[next].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = Math.max(current - 1, 0);
+      slides[prev].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
