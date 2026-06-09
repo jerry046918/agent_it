@@ -23,6 +23,84 @@
 </tr>
 </table>
 
+## 快速开始
+
+### Claude Code
+
+Skill 通过 `~/.claude/skills/` 目录加载（Windows 为 `%USERPROFILE%\.claude\skills\`）。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/jerry046918/ai_anything_skill.git
+
+# 2. 复制 skill 到 Claude Code 用户级 skill 目录
+cp -r ai_anything_skill/skills/ai-anything ~/.claude/skills/
+
+# 3. 启动 Claude Code，skill 会自动发现
+claude
+# 输入 /ai-anything 即可调用
+```
+
+也可作为项目级 skill 使用（提交到项目 git，团队共享）：
+
+```bash
+cp -r ai_anything_skill/skills/ai-anything .claude/skills/
+```
+
+> 参考：[Claude Code Skills 官方文档](https://code.claude.com/docs/en/skills)
+
+### OpenAI Codex CLI
+
+Codex 使用 `.agents/skills/` 目录加载 Skill。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/jerry046918/ai_anything_skill.git
+
+# 2. 复制 skill 到用户级目录
+cp -r ai_anything_skill/skills/ai-anything ~/.agents/skills/
+
+# 3. 或复制到项目级目录（团队共享）
+cp -r ai_anything_skill/skills/ai-anything .agents/skills/
+```
+
+Codex 会自动扫描 `.agents/skills/` 目录，根据 `SKILL.md` 中的 `description` 字段判断何时触发 Skill。
+
+> 参考：[Codex Skills 文档](https://developers.openai.com/codex/skills) · [AGENTS.md 规范](https://agents.md/)
+
+### OpenCode
+
+OpenCode 同样实现了 Agent Skills 开放标准，通过 `SKILL.md` 文件加载。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/jerry046918/ai_anything_skill.git
+
+# 2. 复制 skill 到用户级目录
+cp -r ai_anything_skill/skills/ai-anything ~/.opencode/skills/
+
+# 3. 或复制到项目级目录
+cp -r ai_anything_skill/skills/ai-anything .opencode/skills/
+```
+
+也可通过 `AGENTS.md` 引用 Skill 目录（在项目根目录或 `~/` 创建）：
+
+```markdown
+<!-- AGENTS.md -->
+When the user mentions any business or workflow, use the ai-anything skill.
+```
+
+> 参考：[OpenCode Skills 文档](https://opencode.ai/docs/skills/) · [OpenCode Rules 文档](https://opencode.ai/docs/rules/)
+
+### 一次性运行（无需安装）
+
+如果只想试用，可以直接将 `SKILL.md` 内容喂给任意 AI：
+
+```bash
+# 将 SKILL.md 内容作为系统提示传入
+claude -p "$(cat skills/ai-anything/SKILL.md) 我要做HR考勤管理的AI转型"
+```
+
 ## 方法论
 
 ### 核心哲学

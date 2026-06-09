@@ -31,6 +31,74 @@ All reports are structured around a mandatory four-layer model:
 └─────────────────────────────────────────┘
 ```
 
+## Quick Start
+
+### Claude Code
+
+Skills are loaded from `~/.claude/skills/` (`%USERPROFILE%\.claude\skills\` on Windows).
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/jerry046918/ai_anything_skill.git
+
+# 2. Copy skill to user-level skill directory
+cp -r ai_anything_skill/skills/ai-anything ~/.claude/skills/
+
+# 3. Start Claude Code — skill is auto-discovered
+claude
+# Type /ai-anything to invoke
+```
+
+For project-level (shared with team via git):
+
+```bash
+cp -r ai_anything_skill/skills/ai-anything .claude/skills/
+```
+
+> Docs: [Claude Code Skills](https://code.claude.com/docs/en/skills)
+
+### OpenAI Codex CLI
+
+Codex loads skills from `.agents/skills/` directories.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/jerry046918/ai_anything_skill.git
+
+# 2. Copy to user-level directory
+cp -r ai_anything_skill/skills/ai-anything ~/.agents/skills/
+
+# 3. Or project-level (shared with team)
+cp -r ai_anything_skill/skills/ai-anything .agents/skills/
+```
+
+Codex auto-scans `.agents/skills/` and triggers skills based on the `description` field in `SKILL.md`.
+
+> Docs: [Codex Skills](https://developers.openai.com/codex/skills) · [AGENTS.md spec](https://agents.md/)
+
+### OpenCode
+
+OpenCode implements the Agent Skills open standard via `SKILL.md` files.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/jerry046918/ai_anything_skill.git
+
+# 2. Copy to user-level directory
+cp -r ai_anything_skill/skills/ai-anything ~/.opencode/skills/
+
+# 3. Or project-level
+cp -r ai_anything_skill/skills/ai-anything .opencode/skills/
+```
+
+> Docs: [OpenCode Skills](https://opencode.ai/docs/skills/) · [OpenCode Rules](https://opencode.ai/docs/rules/)
+
+### One-off Run (No Install)
+
+```bash
+claude -p "$(cat skills/ai-anything/SKILL.md) I need an AI transformation report for my HR attendance management"
+```
+
 ### Report Generation Process
 
 The skill operates in two phases:
