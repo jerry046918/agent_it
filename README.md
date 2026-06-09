@@ -51,20 +51,20 @@ cp -r ai_anything_skill/skills/ai-anything .claude/skills/
 
 ### OpenAI Codex CLI
 
-Codex 使用 `.agents/skills/` 目录加载 Skill。
+Codex 通过 `~/.codex/skills/` 目录加载全局 Skill，也支持项目级 `.agents/skills/`。
 
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/jerry046918/ai_anything_skill.git
 
 # 2. 复制 skill 到用户级目录
-cp -r ai_anything_skill/skills/ai-anything ~/.agents/skills/
+cp -r ai_anything_skill/skills/ai-anything ~/.codex/skills/
 
 # 3. 或复制到项目级目录（团队共享）
 cp -r ai_anything_skill/skills/ai-anything .agents/skills/
 ```
 
-Codex 会自动扫描 `.agents/skills/` 目录，根据 `SKILL.md` 中的 `description` 字段判断何时触发 Skill。
+Codex 已采用 Anthropic 的开放 Skill 格式，Claude Code 的 Skill 可以直接在 Codex 中使用。
 
 > 参考：[Codex Skills 文档](https://developers.openai.com/codex/skills) · [AGENTS.md 规范](https://agents.md/)
 

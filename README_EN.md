@@ -59,20 +59,20 @@ cp -r ai_anything_skill/skills/ai-anything .claude/skills/
 
 ### OpenAI Codex CLI
 
-Codex loads skills from `.agents/skills/` directories.
+Codex loads global skills from `~/.codex/skills/` and also supports project-level `.agents/skills/`.
 
 ```bash
 # 1. Clone the repo
 git clone https://github.com/jerry046918/ai_anything_skill.git
 
 # 2. Copy to user-level directory
-cp -r ai_anything_skill/skills/ai-anything ~/.agents/skills/
+cp -r ai_anything_skill/skills/ai-anything ~/.codex/skills/
 
 # 3. Or project-level (shared with team)
 cp -r ai_anything_skill/skills/ai-anything .agents/skills/
 ```
 
-Codex auto-scans `.agents/skills/` and triggers skills based on the `description` field in `SKILL.md`.
+Codex has adopted Anthropic's open skill format — Claude Code skills work out of the box.
 
 > Docs: [Codex Skills](https://developers.openai.com/codex/skills) · [AGENTS.md spec](https://agents.md/)
 
