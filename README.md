@@ -4,6 +4,25 @@
 
 一套结构化的 AI Agent Skill，面向任意业务领域生成完整的 AI-Native 转型战略蓝图。通过系统化的深度访谈流程和严谨的四层架构方法论，输出专业级 HTML 格式的 Agent 驱动转型路线图报告。
 
+## 报告预览
+
+以 HR 考勤管理（2000+人员规模）为示例生成的完整报告。在浏览器中打开 [`examples/hr-attendance-report.html`](examples/hr-attendance-report.html) 查看完整效果。
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/cover.png" alt="封面页" width="100%"/><br/><sup>封面页：动态渐变背景 + 网格线 + 浮动光球</sup></td>
+<td width="50%"><img src="docs/screenshots/paradigm.png" alt="范式转换" width="100%"/><br/><sup>范式转换表：过时范式（红色删除线） vs AI-Native 范式</sup></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/architecture.png" alt="四层架构" width="100%"/><br/><sup>四层 AI-Native 架构图：超级编排层 ★ CORE 高亮</sup></td>
+<td width="50%"><img src="docs/screenshots/agent-card.png" alt="Agent转型卡片" width="100%"/><br/><sup>Agent 转型卡片：传统模式 vs Agent 驱动模式对比</sup></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/topology.png" alt="Agent拓扑图" width="100%"/><br/><sup>Agent 拓扑图：五大 Agent 集群 + A2A Mesh 连接</sup></td>
+<td width="50%"><img src="docs/screenshots/evolution.png" alt="三阶段演进" width="100%"/><br/><sup>三阶段演进路线：Skill → 单Agent → 多Agent A2A</sup></td>
+</tr>
+</table>
+
 ## 方法论
 
 ### 核心哲学
