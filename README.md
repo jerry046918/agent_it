@@ -162,11 +162,27 @@ Skill 分两个阶段运作：
 
 ```
 skills/ai-anything/
-├── SKILL.md               # Skill 定义：访谈协议、转型规则、命名规范、
-│                          #   术语要求、报告结构
-└── report-template.html   # HTML 报告模板（暗色主题、毛玻璃效果、
-                               动画元素、响应式布局）
+├── SKILL.md                        # Skill 定义：访谈协议、转型规则、命名规范、
+│                                   #   术语要求、报告结构（支持双模板选择）
+├── report-template.html            # Slides 模式模板 — 逐页翻页演示，键盘导航
+│                                   #   进度条 + 计数器 + 导航点
+└── report-template-continuous.html # Report 模式模板 — 连续滚动阅读，侧边栏 TOC
+                                    #   追踪阅读进度 + 回到顶部按钮
 ```
+
+### 双模板模式
+
+报告支持两种输出模式，在访谈的第二轮半（Round 2.5）中由用户选择：
+
+| 特性 | Slides 模式 | Report 模式 |
+|------|-------------|-------------|
+| 布局 | 每页一屏（100vh），scroll-snap | 自由滚动，侧边栏目录导航 |
+| 交互 | 键盘翻页 + 导航点 + 进度条 | 侧边栏目录高亮追踪 + 回到顶部 |
+| Agent 卡片 | 每页一张卡片 | 垂直堆叠在同一个章节内 |
+| 移动端 | 网格逐页适配 | 汉堡菜单展开 TOC |
+| 输出 | 适合投屏演示、管理层汇报 | 适合详细审阅、邮件附件、存档 |
+
+两种模式共享同一套视觉设计系统（暗色主题、毛玻璃效果、渐变高亮）和相同的 `{{占位符}}` 结构。
 
 ## 使用方式
 
@@ -179,16 +195,17 @@ Skill 设计用于被支持 Skill 工作流的 AI Agent（Claude Code、Gemini C
 - 用户询问 AI 转型、数字化升级或智能化改造
 - 用户分享任何可通过 Agent 驱动重新设计的业务场景
 
-**调用方式：** Agent 读取 `SKILL.md`，遵循访谈协议，然后以 `report-template.html` 为结构和视觉基础生成完整的 HTML 报告。
+**调用方式：** Agent 读取 `SKILL.md`，遵循访谈协议，根据用户选择以 `report-template.html`（Slides 模式）或 `report-template-continuous.html`（Report 模式）为结构和视觉基础生成完整的 HTML 报告。
 
 ### 独立使用
 
 独立使用报告模板：
 
-1. 在文本编辑器中打开 `report-template.html`
-2. 将所有 `{{占位符}}` 替换为基于自身业务分析的内容
-3. 在浏览器中打开生成的 HTML 文件
-4. 按需打印或导出为 PDF
+1. 选择模板：`report-template.html`（演示）或 `report-template-continuous.html`（报告）
+2. 在文本编辑器中打开模板文件
+3. 将所有 `{{占位符}}` 替换为基于自身业务分析的内容
+4. 在浏览器中打开生成的 HTML 文件
+5. 按需打印或导出为 PDF
 
 ### 报告定制
 

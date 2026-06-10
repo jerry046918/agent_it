@@ -71,6 +71,22 @@ Capture the answer as a CSS-compatible color value (hex, rgb, or named color). I
 
 **Usage:** Replace `--accent-blue` and related gradient anchors in the HTML template with this color. In the report, mention "基于[公司名]品牌色的视觉语言系统" as a design decision.
 
+### Round 2.5: Report Format
+
+Use `AskUserQuestion` with a single question offering two options:
+
+"蓝图将以什么形式呈现？"
+
+Options:
+- **Slides 模式 (演示文稿)** — 逐页翻页交互，适合投屏演示、管理层汇报。每页一屏，支持键盘导航和进度指示。使用 `report-template.html`。
+- **Report 模式 (连续报告)** — 侧边栏目录导航，连续滚动阅读，适合详细审阅、邮件附件、存档。使用 `report-template-continuous.html`。
+
+**Both modes share the same visual design system, content sections, and placeholder structure.** The only difference is layout:
+- Slides: `100vh` per section, `scroll-snap-type: y mandatory`, nav dots, progress bar, slide counter
+- Report: free-scrolling sections, fixed sidebar TOC with active state tracking, back-to-top button
+
+If the user doesn't express a preference, default to **Slides mode**.
+
 ### Round 3: Sci-Fi (peak absurdity)
 
 Use `AskUserQuestion` with a single open-ended question. **Do NOT provide options or examples.** Just ask directly and let the user figure out why you're asking this.
@@ -366,9 +382,23 @@ The timeline title must be: **"Agent化演进路线图：从Skill上线到A2A协
 
 ### Report Structure
 
-The report is a **slide-based presentation** — each section occupies exactly one viewport (100vh). No scrolling within slides. Heavy use of whitespace. Minimal text per slide.
+The report supports **two output modes**, selected in Round 2.5. Both share the same content sections and placeholder system.
 
-Generate the HTML report using the template in `report-template.html`. The report contains these slides:
+**Slides mode** (`report-template.html`): Each section occupies exactly one viewport (100vh). No scrolling within slides. Heavy use of whitespace. Minimal text per slide. Keyboard navigation (arrows, space), nav dots, progress bar, slide counter.
+
+**Report mode** (`report-template-continuous.html`): Free-scrolling sections with a fixed sidebar TOC that tracks reading progress. Sections separated by borders, no viewport constraints. Content can be longer and more detailed. Back-to-top button, mobile-responsive hamburger menu for TOC. Print-friendly layout by default.
+
+Both templates use the same `{{PLACEHOLDER}}` system and share the same visual design language (dark theme, glassmorphism, gradient accents). The key structural difference:
+
+| Aspect | Slides (`report-template.html`) | Report (`report-template-continuous.html`) |
+|--------|------|--------|
+| Layout | `100vh` per section, scroll-snap | Free scroll, sidebar TOC |
+| Navigation | Dots + keyboard + progress bar | Sidebar TOC + back-to-top |
+| Agent cards | One per slide (separate `<section>`) | Stacked cards in one section |
+| Mobile | Grid collapses per slide | Hamburger menu for TOC |
+| Print | One page per slide | Continuous document |
+
+The report contains these sections (both modes):
 
 1. **Cover** — Title, subtitle, date, "Four-Layer AI-Native" badge
 2. **AI-Native Declaration** — The manifesto quote (one powerful paragraph, centered)
@@ -377,31 +407,42 @@ Generate the HTML report using the template in `report-template.html`. The repor
 5. **Why [XX] Is THE Ideal AI-Native Business** — 4 reason cards in 2x2 grid
 6. **Target Architecture** — The Four-Layer stack diagram (compact descriptions)
 7. **Agent Topology** — Text-based topology diagram
-8+. **Agent Transformation Cards** — **One card per slide** (NOT all crammed together). Each slide shows a single module's before/after transformation, its Agent composition, and Skill set. Max 2-3 short paragraphs per slide.
+8+. **Agent Transformation Cards** —
+  - *Slides mode:* **One card per slide** (NOT all crammed together). Each slide shows a single module's before/after transformation, its Agent composition, and Skill set. Max 2-3 short paragraphs per slide.
+  - *Report mode:* Cards stacked vertically within the Agent Transformation section. Each card is a `.agent-card` div with full detail.
 9. **Three-Phase Evolution** — 3 cards side by side (Skill → 单Agent → 多Agent A2A)
 10. **ROI Projection** — Single data table
 11. **Risk Assessment** — Table + key insight box
 12. **Organizational Rebirth** — Role transformation cards (old title → new title)
 13. **Conclusion** — Final manifesto + disclaimer
 
-**Content density rules:**
+**Content density rules (Slides mode):**
 - Max 1 heading + 1 key message per slide
 - Paragraphs: max 2-3 lines each
 - Tables: max 7-8 rows
 - Agent cards: 1 per slide, never stack them
 - Let the whitespace do the talking — premium design breathes
 
+**Content density rules (Report mode):**
+- Sections can have multiple paragraphs, no viewport constraint
+- Tables: max 10-12 rows (more room available)
+- Agent cards: stacked vertically, each with full detail
+- Use more explanatory text — readers scroll, they don't present
+
 ## HTML Output
 
 Write the complete HTML report to a file in the working directory:
 - Filename: `ai-transformation-report-[timestamp].html`
-- Use the template structure from `report-template.html`
+- Use the template selected in Round 2.5:
+  - Slides mode → use `report-template.html`
+  - Report mode → use `report-template-continuous.html`
 - Fill in all placeholders with content derived from the interview
-- Each `<section class="slide">` = one full viewport. Content must fit without scrolling.
 - The HTML is self-contained (inline CSS + minimal JS for navigation and reveal animations)
-- Keyboard navigation (arrows, space) and nav dots are built into the template
 
-**Agent Transformation Slides:** For the `{{AGENT_TRANSFORMATION_SLIDES}}` placeholder, generate one `<section class="slide">` per module. Each slide gets its own `id="slide-agent-N"` and uses the `.agent-card` component. Do NOT put multiple agent cards on one slide.
+**Agent Transformation Content:**
+
+- **Slides mode:** For the `{{AGENT_TRANSFORMATION_SLIDES}}` placeholder, generate one `<section class="slide">` per module. Each slide gets its own `id="slide-agent-N"` and uses the `.agent-card` component. Do NOT put multiple agent cards on one slide. Content must fit without scrolling.
+- **Report mode:** For the `{{AGENT_TRANSFORMATION_CARDS}}` placeholder, generate `<div class="agent-card">` blocks stacked within the single agents section. Each card gets the full `.agent-card` component with `.agent-header`, `.transform-compare`, `.agent-section-title` sub-elements. Cards are separated by their built-in `margin-bottom: 1.5rem`.
 
 **Company Color Injection:** Replace `--accent-blue: #6366f1` in the CSS with the company theme color captured in Round 2. Also adjust `--gradient-main` and `--gradient-glow` to use the company color as the primary anchor.
 

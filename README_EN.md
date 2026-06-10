@@ -133,11 +133,27 @@ Using the interview data, the skill produces a complete HTML report containing:
 
 ```
 skills/ai-anything/
-├── SKILL.md               # Skill definition: interview protocol, transformation rules,
-│                          #   naming conventions, buzzword requirements, report structure
-└── report-template.html   # HTML report template with full styling (dark theme,
-                               glassmorphism, animated elements, responsive layout)
+├── SKILL.md                        # Skill definition: interview protocol, transformation rules,
+│                                   #   naming conventions, buzzword requirements, report structure
+├── report-template.html            # Slides mode template — full-viewport per section, scroll-snap,
+│                                   #   nav dots, progress bar, slide counter, keyboard navigation
+└── report-template-continuous.html # Report mode template — free-scrolling sections, fixed sidebar
+                                    #   TOC with active state tracking, back-to-top button
 ```
+
+### Dual Template Modes
+
+The report supports two output modes, selected by the user during the interview (Round 2.5):
+
+| Feature | Slides Mode | Report Mode |
+|---------|-------------|-------------|
+| Layout | Full-viewport per section (100vh), scroll-snap | Free-scrolling, sidebar TOC navigation |
+| Interaction | Keyboard arrows/space + nav dots + progress bar | Sidebar TOC highlights active section + back-to-top |
+| Agent cards | One card per slide | Vertically stacked in single section |
+| Mobile | Grid adapts per slide | Hamburger menu for TOC |
+| Best for | Screen presentations, executive briefings | Detailed review, email attachments, archiving |
+
+Both modes share the same visual design system (dark theme, glassmorphism, gradient accents) and the same `{{PLACEHOLDER}}` structure.
 
 ## Usage
 
@@ -150,16 +166,17 @@ The skill is designed to be loaded by AI agents (Claude Code, Gemini CLI, etc.) 
 - User asks about AI transformation, digital modernization, or automation
 - User shares any business context that could benefit from Agent-driven redesign
 
-**To invoke:** The agent reads `SKILL.md`, follows the interview protocol, then generates a complete HTML report using `report-template.html` as the structural and visual foundation.
+**To invoke:** The agent reads `SKILL.md`, follows the interview protocol, then generates a complete HTML report using `report-template.html` (Slides mode) or `report-template-continuous.html` (Report mode) as the structural and visual foundation.
 
 ### Standalone Usage
 
 To use the report template independently:
 
-1. Open `report-template.html` in a text editor
-2. Replace all `{{PLACEHOLDER}}` values with content derived from your own business analysis
-3. Open the resulting HTML file in any modern browser
-4. Print or export to PDF as needed
+1. Choose a template: `report-template.html` (presentation) or `report-template-continuous.html` (document)
+2. Open the template file in a text editor
+3. Replace all `{{PLACEHOLDER}}` values with content derived from your own business analysis
+4. Open the resulting HTML file in any modern browser
+5. Print or export to PDF as needed
 
 ### Report Customization
 
@@ -245,12 +262,13 @@ Phase 1 (Month 1-2)          Phase 2 (Month 3-4)          Phase 3 (Month 5-6)
 
 ## Technical Notes
 
-- The report template is fully self-contained — single HTML file, no external JS dependencies
+- Both report templates are fully self-contained — single HTML file, no external JS dependencies
 - Google Fonts (Outfit, Noto Sans SC, JetBrains Mono) loaded via CDN; graceful fallback to system fonts
 - Responsive layout with mobile breakpoints
 - Print stylesheet included for PDF export
 - All animations are CSS-only (no JavaScript required for visual effects)
-- Supports `prefers-reduced-motion` via static fallbacks
+- Slides mode: scroll-snap navigation with IntersectionObserver for reveal animations
+- Report mode: fixed sidebar TOC with active section tracking, back-to-top button, mobile hamburger menu
 
 ## Contributing
 
